@@ -75,7 +75,7 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
         }
     }
     
-    func setSectionedValues(_ sectionedValues: SectionedValues<Section, Value>, animated: Bool = true, completion: (() -> Void)? = nil) {
+    public func setSectionedValues(_ sectionedValues: SectionedValues<Section, Value>, animated: Bool = true, completion: (() -> Void)? = nil) {
         let oldSectionedValues = self.sectionedValues
         let newSectionedValues = sectionedValues
         let diff = Dwifft.diff(lhs: oldSectionedValues, rhs: newSectionedValues)

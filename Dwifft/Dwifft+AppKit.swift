@@ -49,18 +49,19 @@ public final class TableViewDiffCalculator<Value: Equatable>: AbstractDiffCalcul
         super.init(initialSectionedValues: AbstractDiffCalculator<Int, Value>.buildSectionedValues(values: initialRows, sectionIndex: sectionIndex))
     }
     
-    override internal func processChanges(newState: SectionedValues<Int, Value>, diff: [SectionedDiffStep<Int, Value>]) {
+    override internal func processChanges(newState: SectionedValues<Int, Value>, diff: [SectionedDiffStep<Int, Value>], animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let tableView = self.tableView else { return }
         tableView.beginUpdates()
         self._sectionedValues = newState
         for result in diff {
             switch result {
-            case let .delete(_, row, _): tableView.removeRows(at: [row], withAnimation: self.deletionAnimation)
-            case let .insert(_, row, _): tableView.insertRows(at: [row], withAnimation: self.insertionAnimation)
+            case let .delete(_, row, _): tableView.removeRows(at: [row], withAnimation: anomated ? self.deletionAnimation : .none)
+            case let .insert(_, row, _): tableView.insertRows(at: [row], withAnimation: animated ? self.insertionAnimation : .none)
             default: fatalError("NSTableViews do not have sections")
             }
         }
         tableView.endUpdates()
+        completion?()
     }
 
 }
@@ -124,7 +125,7 @@ public final class CollectionViewDiffCalculator<Section: Equatable, Value: Equat
         super.init(initialSectionedValues: initialSectionedValues)
     }
     
-    override internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>]) {
+    override internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>], animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let collectionView = self.collectionView else { return }
         collectionView.performBatchUpdates({
             self._sectionedValues = newState
@@ -143,7 +144,7 @@ public final class CollectionViewDiffCalculator<Section: Equatable, Value: Equat
                     }
                 }
             }
-        }, completionHandler: nil)
+        }, completionHandler: completion)
     }
 }
 

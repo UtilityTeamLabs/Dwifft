@@ -30,19 +30,20 @@ public final class TableViewDiffCalculator<Section: Equatable, Value: Equatable>
     /// So does Top/Bottom. Left/Right/Middle are a little weird, but hey, do your thing.
     public var insertionAnimation = UITableViewRowAnimation.automatic, deletionAnimation = UITableViewRowAnimation.automatic
 
-    override internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>]) {
+    override internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>], animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let tableView = self.tableView else { return }
         tableView.beginUpdates()
         self._sectionedValues = newState
         for result in diff {
             switch result {
-            case let .delete(section, row, _): tableView.deleteRows(at: [IndexPath(row: row, section: section)], with: self.deletionAnimation)
-            case let .insert(section, row, _): tableView.insertRows(at: [IndexPath(row: row, section: section)], with: self.insertionAnimation)
-            case let .sectionDelete(section, _): tableView.deleteSections(IndexSet(integer: section), with: self.deletionAnimation)
-            case let .sectionInsert(section, _): tableView.insertSections(IndexSet(integer: section), with: self.insertionAnimation)
+            case let .delete(section, row, _): tableView.deleteRows(at: [IndexPath(row: row, section: section)], with: animated ? self.deletionAnimation : .none)
+            case let .insert(section, row, _): tableView.insertRows(at: [IndexPath(row: row, section: section)], with: animated ? self.insertionAnimation : .none)
+            case let .sectionDelete(section, _): tableView.deleteSections(IndexSet(integer: section), with: animated ? self.deletionAnimation : .none)
+            case let .sectionInsert(section, _): tableView.insertSections(IndexSet(integer: section), with: animated ? self.insertionAnimation : .none)
             }
         }
         tableView.endUpdates()
+        completion?()
     }
 }
 
@@ -64,8 +65,9 @@ public final class CollectionViewDiffCalculator<Section: Equatable, Value: Equat
         super.init(initialSectionedValues: initialSectionedValues)
     }
 
-    override internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>]) {
+    override internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>], animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let collectionView = self.collectionView else { return }
+        // TODO: Respect animated flag
         collectionView.performBatchUpdates({
             self._sectionedValues = newState
             for result in diff {
@@ -76,7 +78,9 @@ public final class CollectionViewDiffCalculator<Section: Equatable, Value: Equat
                 case let .sectionInsert(section, _): collectionView.insertSections(IndexSet(integer: section))
                 }
             }
-        }, completion: nil)
+        }, completion: { _ in
+            completion?()
+        })
     }
 }
 

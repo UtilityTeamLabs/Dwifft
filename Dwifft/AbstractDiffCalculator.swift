@@ -71,12 +71,16 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
             return _sectionedValues
         }
         set {
-            let oldSectionedValues = sectionedValues
-            let newSectionedValues = newValue
-            let diff = Dwifft.diff(lhs: oldSectionedValues, rhs: newSectionedValues)
-            if (diff.count > 0) {
-                self.processChanges(newState: newSectionedValues, diff: diff)
-            }
+            self.setSectionedValues(newValue)
+        }
+    }
+    
+    func setSectionedValues(_ sectionedValues: SectionedValues<Section, Value>, animated: Bool = true, completion: (() -> Void)? = nil) {
+        let oldSectionedValues = self.sectionedValues
+        let newSectionedValues = sectionedValues
+        let diff = Dwifft.diff(lhs: oldSectionedValues, rhs: newSectionedValues)
+        if (diff.count > 0) {
+            self.processChanges(newState: newSectionedValues, diff: diff, animated: animated, completion: completion)
         }
     }
     
@@ -87,7 +91,7 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
     
     // UITableView and UICollectionView both perform assertions on the *current* number of rows/items before performing any updates. As such, the `sectionedValues` property must be backed by an internal value that does not change until *after* `beginUpdates`/`performBatchUpdates` has been called.
     internal final var _sectionedValues: SectionedValues<Section, Value>
-    internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>]){
+    internal func processChanges(newState: SectionedValues<Section, Value>, diff: [SectionedDiffStep<Section, Value>], animated: Bool = true, completion: (() -> Void)? = nil) {
         fatalError("override me")
     }
 }

@@ -55,8 +55,8 @@ public final class TableViewDiffCalculator<Value: Equatable>: AbstractDiffCalcul
         self._sectionedValues = newState
         for result in diff {
             switch result {
-            case let .delete(_, row, _): tableView.removeRows(at: [row], withAnimation: animated ? self.deletionAnimation : .none)
-            case let .insert(_, row, _): tableView.insertRows(at: [row], withAnimation: animated ? self.insertionAnimation : .none)
+            case let .delete(_, row, _): tableView.removeRows(at: [row], withAnimation: animated ? self.deletionAnimation : [])
+            case let .insert(_, row, _): tableView.insertRows(at: [row], withAnimation: animated ? self.insertionAnimation : [])
             default: fatalError("NSTableViews do not have sections")
             }
         }
@@ -144,7 +144,9 @@ public final class CollectionViewDiffCalculator<Section: Equatable, Value: Equat
                     }
                 }
             }
-        }, completionHandler: completion)
+        }, completionHandler: { _ in
+            completion?()
+        })
     }
 }
 

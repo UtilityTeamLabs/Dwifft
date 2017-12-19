@@ -15,6 +15,23 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
         self._sectionedValues = initialSectionedValues
     }
     
+    public final func isValidSection(_ section: Int) -> Bool {
+        return section < self.sectionedValues.sections.count
+    }
+    
+    public final func isValidIndexPath(_ indexPath: IndexPath) -> Bool {
+        guard self.isValidSection(indexPath.section) else {
+            return false
+        }
+        #if os(iOS) || os(tvOS)
+            let row = indexPath.row
+        #endif
+        #if os(macOS)
+            let row = indexPath.item
+        #endif
+        return row < self.sectionedValues[indexPath.section].1.count
+    }
+    
     /// The number of sections in the diff calculator. Return this inside
     /// `numberOfSections(in: tableView)` or `numberOfSections(in: collectionView)`.
     /// Don't implement that method any other way (see the docs for `numberOfObjects(inSection:)`
@@ -29,8 +46,8 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
     ///
     /// - Parameter forSection: the index of the section you care about.
     /// - Returns: the Section at that index.
-    public final func value(forSection: Int) -> Section {
-        return self.sectionedValues[forSection].0
+    public final func value(forSection section: Int) -> Section {
+        return self.sectionedValues[section].0
     }
     
     

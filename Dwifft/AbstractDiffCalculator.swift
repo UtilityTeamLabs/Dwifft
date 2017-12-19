@@ -70,7 +70,10 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
     ///
     /// - Parameter indexPath: the index path you are interested in
     /// - Returns: the thing at that index path
-    public final func value(atIndexPath indexPath: IndexPath) -> Value {
+    public final func value(atIndexPath indexPath: IndexPath) -> Value? {
+        guard self.isValidIndexPath(indexPath) else {
+            return nil
+        }
         #if os(iOS) || os(tvOS)
             let row = indexPath.row
         #endif
@@ -80,6 +83,15 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
         return self.sectionedValues[indexPath.section].1[row]
     }
     
+    
+    public final func section(atIndexPath indexPath: IndexPath) -> Section? {
+        guard self.isValidSection(indexPath.section) else {
+            return nil
+        }
+        return self.value(forSection: indexPath.section)
+    }
+    
+    
     public final func indexPath(forSection section: Section) -> IndexPath? {
         guard let sectionIndex = self.sectionedValues.sections.index(where: { $0 == section }) else {
             return nil
@@ -87,6 +99,7 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
         
         return IndexPath(item: 0, section: sectionIndex)
     }
+    
     
     public final func indexPath(forValue value: Value, inSection section: Section) -> IndexPath? {
         guard var indexPath = self.indexPath(forSection: section) else {

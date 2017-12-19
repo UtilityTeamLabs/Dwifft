@@ -80,6 +80,27 @@ public class AbstractDiffCalculator<Section: Equatable, Value: Equatable> {
         return self.sectionedValues[indexPath.section].1[row]
     }
     
+    public final func indexPath(forSection section: Section) -> IndexPath? {
+        guard let sectionIndex = self.sectionedValues.sections.index(where: { $0 == section }) else {
+            return nil
+        }
+        
+        return IndexPath(item: 0, section: sectionIndex)
+    }
+    
+    public final func indexPath(forValue value: Value, inSection section: Section) -> IndexPath? {
+        guard var indexPath = self.indexPath(forSection: section) else {
+            return nil
+        }
+        
+        guard let itemIndex = self.sectionedValues[indexPath.section].1.index(of: value) else {
+            return nil
+        }
+        
+        indexPath.item = itemIndex
+        return indexPath
+    }
+    
     
     /// Set this variable to automatically trigger the correct section/row/item insertion/deletions
     /// on your table/collection view.
